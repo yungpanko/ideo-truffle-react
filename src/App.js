@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
 import IdeoCoinContract from '../build/contracts/IdeoCoin.json'
 import getWeb3 from './utils/getWeb3'
+import Balances from './components/Balances.js'
 
 import './css/oswald.css'
 import './css/open-sans.css'
@@ -17,7 +18,7 @@ class App extends Component {
       web3: null,
       input: '',
       fromValue: '0x627306090abaB3A6e1400e9345bC60c78a8BEf57',
-      toValue: '',
+      toValue: '0xf17f52151EbEF6C7334FAD080c5704D77216b732',
       amount: '',
       accountOneBalance: 0,
       accountTwoBalance: 0
@@ -53,6 +54,8 @@ class App extends Component {
       this.setState({
         web3: results.web3
       })
+      this.getCoinOwnerBalance()
+      this.getIndexOneBalance()
       // this.getIdeoCoinBalance()
     })
     .catch(() => {
@@ -109,19 +112,19 @@ class App extends Component {
     IdeoCoin.setProvider(this.state.web3.currentProvider)
 
     var meta;
-    IdeoCoin.deployed().then(function(instance) {
+    IdeoCoin.deployed().then(instance => {
       meta = instance;
       return meta.sendCoin(to, amount, {from: from});
-    }).then(function(result) {
+    }).then(result => {
       // If this callback is called, the transaction was successfully processed.
-      alert("Transaction successful!")
-    }).catch(function(e) {
-      console.log(e);
+      console.log("Transaction successful!")
+    }).catch(err => {
+      console.log(err);
       // There was an error! Handle it.
     })
   }
 
-  getIdeoCoinBalance() {
+  getCoinOwnerBalance() {
     const contract = require('truffle-contract')
     const IdeoCoin = contract(IdeoCoinContract)
     IdeoCoin.setProvider(this.state.web3.currentProvider)
@@ -133,7 +136,7 @@ class App extends Component {
     var meta;
 
 
-    IdeoCoin.deployed().then(function(instance) {
+    IdeoCoin.deployed().then(instance => {
       meta = instance;
       return meta.getBalance.call(account_one, {from: account_one});
     }).then(balance => {
@@ -144,8 +147,37 @@ class App extends Component {
       this.setState({
         accountOneBalance: balance.toNumber()
       })
-    }).catch(function(e) {
-      console.log(e);
+    }).catch(err => {
+      console.log(err);
+      // There was an error! Handle it.
+    })
+  }
+
+  getIndexOneBalance() {
+    const contract = require('truffle-contract')
+    const IdeoCoin = contract(IdeoCoinContract)
+    IdeoCoin.setProvider(this.state.web3.currentProvider)
+    // IdeoCoin.deployed().then(function(instance) {
+    //   console.log(instance);
+    // });
+
+    var account_one = '0xf17f52151EbEF6C7334FAD080c5704D77216b732'; // an address
+    var meta;
+
+
+    IdeoCoin.deployed().then(instance => {
+      meta = instance;
+      return meta.getBalance.call(account_one, {from: account_one});
+    }).then(balance => {
+      // If this callback is called, the call was successfully executed.
+      // Note that this returns immediately without any waiting.
+      // Let's print the return value.
+      console.log(balance.toNumber());
+      this.setState({
+        accountTwoBalance: balance.toNumber()
+      })
+    }).catch(err => {
+      console.log(err);
       // There was an error! Handle it.
     })
   }
@@ -217,6 +249,8 @@ class App extends Component {
   handleTransactionSubmit = (event) => {
     event.preventDefault()
     this.executeFormTransaction(this.state.fromValue, this.state.toValue, this.state.amount)
+    this.getCoinOwnerBalance()
+    this.getIndexOneBalance()
   }
 
   handleToValueChange = (event) => {
@@ -259,7 +293,7 @@ class App extends Component {
               <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
               <p>The stored value is: {this.state.storageValue}</p> */}
               <h1>{resp}</h1>
-              <button onClick={this.getIdeoCoinBalance.bind(this)}>
+              <button onClick={(event) => {this.getCoinOwnerBalance();this.getIndexOneBalance();}}>
                 Get Balances
               </button>
               <form onSubmit={this.handleTransactionSubmit}>
@@ -267,14 +301,12 @@ class App extends Component {
                 <select value={this.state.fromValue} onChange={this.handleFromValueChange}>
                   <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Coin Owner</option>
                   <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Index 1</option>
-                  <option value="0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef">Index 2</option>
                 </select>
                 <br/>
                 <label>To</label>
                 <select value={this.state.toValue} onChange={this.handleToValueChange}>
-                  <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Coin Owner</option>
                   <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Index 1</option>
-                  <option value="0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef">Index 2</option>
+                  <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Coin Owner</option>
                 </select>
                 <br/>
                 <label>Amount</label>
@@ -284,9 +316,7 @@ class App extends Component {
                 <input type="submit"></input>
               </form>
               <ul>
-                <li>Coin Owner Balance: {this.accountOneBalance}</li>
-                <li>Index 1 Balance: {this.accountTwoBalance}</li>
-                <li>Index 2 Balance: {this.accountThreeBalance}</li>
+                <Balances balance1={this.state.accountOneBalance} balance2={this.state.accountTwoBalance}/>
               </ul>
             </div>
             {/* <form onSubmit={this.handleSubmit}>
