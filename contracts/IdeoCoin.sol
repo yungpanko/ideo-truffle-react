@@ -34,7 +34,7 @@ contract IdeoCoin is owned {
   // array of all balances
   mapping (address => uint) public balanceOf;
   // public event on the blockchain that will notify clients
-  event Transfer(address indexed from, address indexed to, uint256 value);
+  /* event Transfer(address indexed from, address indexed to, uint256 value); */
 
   // contstructor function
   function IdeoCoin(uint256 initialSupply, string tokenName, string tokenSymbol, uint8 decimalUnits, address centralMinter) public {
@@ -54,7 +54,7 @@ contract IdeoCoin is owned {
       balanceOf[msg.sender] -= _value;
       balanceOf[_to] += _value;
       /* Notify anyone listening that this transfer took place */
-      Transfer(msg.sender, _to, _value);
+      /* Transfer(msg.sender, _to, _value); */
   }
 
   /* Internal transfer, can only be called by this contract */
@@ -66,14 +66,14 @@ contract IdeoCoin is owned {
     //   require(!frozenAccount[_to]);                       // Check if recipient is frozen
       balanceOf[_from] -= _value;                         // Subtract from the sender
       balanceOf[_to] += _value;                           // Add the same to the recipient
-      Transfer(_from, _to, _value);
+      /* Transfer(_from, _to, _value); */
   }
 
      function mintToken(address target, uint256 mintedAmount) onlyOwner public {
         balanceOf[target] += mintedAmount;
         totalSupply += mintedAmount;
-        Transfer(0, this, mintedAmount);
-        Transfer(this, target, mintedAmount);
+        /* Transfer(0, this, mintedAmount);
+        Transfer(this, target, mintedAmount); */
     }
 
     function getBalanceInEth(address addr) public view returns(uint) {

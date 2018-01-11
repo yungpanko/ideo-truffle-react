@@ -15,7 +15,12 @@ class App extends Component {
     this.state = {
       storageValue: 0,
       web3: null,
-      input: ''
+      input: '',
+      fromValue: '0x627306090abaB3A6e1400e9345bC60c78a8BEf57',
+      toValue: '',
+      amount: '',
+      accountOneBalance: 0,
+      accountTwoBalance: 0
     }
   }
 
@@ -34,7 +39,21 @@ class App extends Component {
       this.getContracts()
       // this.sendIdeoCoin()
       // this.mintCoinsToAccount()
-      this.getIdeoCoinBalance()
+      // this.getIdeoCoinBalance()
+    })
+    .catch(() => {
+      console.log('Error finding web3.')
+    })
+  }
+
+
+  componentDidMount() {
+    getWeb3
+    .then(results => {
+      this.setState({
+        web3: results.web3
+      })
+      // this.getIdeoCoinBalance()
     })
     .catch(() => {
       console.log('Error finding web3.')
@@ -46,12 +65,12 @@ class App extends Component {
     const IdeoCoin = contract(IdeoCoinContract)
     IdeoCoin.setProvider(this.state.web3.currentProvider)
 
-    var account = 2; // an address
+    var account_one = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"; // an address
 
     var meta;
       IdeoCoin.deployed().then(function(instance) {
         meta = instance;
-        return meta.mintToken(account, 1000000);
+        return meta.mintToken(account_one, 1000000);
       }).then(function(result) {
         // If this callback is called, the transaction was successfully processed.
         alert("Transaction successful!")
@@ -76,12 +95,30 @@ class App extends Component {
         return meta.sendCoin(account_two, 1000000, {from: account_one});
       }).then(function(result) {
         // If this callback is called, the transaction was successfully processed.
-        alert("Transaction successful!")
+        console.log("Transaction successful!")
       }).catch(function(e) {
         console.log(e);
         // There was an error! Handle it.
       })
 
+  }
+
+  executeFormTransaction(from, to, amount) {
+    const contract = require('truffle-contract')
+    const IdeoCoin = contract(IdeoCoinContract)
+    IdeoCoin.setProvider(this.state.web3.currentProvider)
+
+    var meta;
+    IdeoCoin.deployed().then(function(instance) {
+      meta = instance;
+      return meta.sendCoin(to, amount, {from: from});
+    }).then(function(result) {
+      // If this callback is called, the transaction was successfully processed.
+      alert("Transaction successful!")
+    }).catch(function(e) {
+      console.log(e);
+      // There was an error! Handle it.
+    })
   }
 
   getIdeoCoinBalance() {
@@ -99,16 +136,18 @@ class App extends Component {
     IdeoCoin.deployed().then(function(instance) {
       meta = instance;
       return meta.getBalance.call(account_one, {from: account_one});
-    }).then(function(balance) {
+    }).then(balance => {
       // If this callback is called, the call was successfully executed.
       // Note that this returns immediately without any waiting.
       // Let's print the return value.
       console.log(balance.toNumber());
+      this.setState({
+        accountOneBalance: balance.toNumber()
+      })
     }).catch(function(e) {
       console.log(e);
       // There was an error! Handle it.
     })
-
   }
 
   getContracts() {
@@ -169,6 +208,29 @@ class App extends Component {
     })
   }
 
+  handleFromValueChange = (event) => {
+    this.setState({
+      fromValue: event.target.value
+    })
+  }
+
+  handleTransactionSubmit = (event) => {
+    event.preventDefault()
+    this.executeFormTransaction(this.state.fromValue, this.state.toValue, this.state.amount)
+  }
+
+  handleToValueChange = (event) => {
+    this.setState({
+      toValue: event.target.value
+    })
+  }
+
+  handleAmountChange = (event) => {
+    this.setState({
+      amount: event.target.value
+    })
+  }
+
   handleSubmit = (event) => {
     event.preventDefault()
     this.instantiateContract(this.state.input)
@@ -176,11 +238,11 @@ class App extends Component {
 
   render() {
     let resp
-    if (this.state.storageValue < 20) {
-      resp = "contract valid"
-    } else {
-      resp = "failed contract"
-    }
+    // if (this.state.storageValue < 20) {
+    //   resp = "contract valid"
+    // } else {
+    //   resp = "failed contract"
+    // }
     return (
       <div className="App">
         <nav className="navbar pure-menu pure-menu-horizontal">
@@ -197,11 +259,40 @@ class App extends Component {
               <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
               <p>The stored value is: {this.state.storageValue}</p> */}
               <h1>{resp}</h1>
+              <button onClick={this.getIdeoCoinBalance.bind(this)}>
+                Get Balances
+              </button>
+              <form onSubmit={this.handleTransactionSubmit}>
+                <label>From</label>
+                <select value={this.state.fromValue} onChange={this.handleFromValueChange}>
+                  <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Coin Owner</option>
+                  <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Index 1</option>
+                  <option value="0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef">Index 2</option>
+                </select>
+                <br/>
+                <label>To</label>
+                <select value={this.state.toValue} onChange={this.handleToValueChange}>
+                  <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Coin Owner</option>
+                  <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Index 1</option>
+                  <option value="0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef">Index 2</option>
+                </select>
+                <br/>
+                <label>Amount</label>
+                <input type='number' onChange={this.handleAmountChange} value={this.state.amount}>
+                </input>
+                <br/>
+                <input type="submit"></input>
+              </form>
+              <ul>
+                <li>Coin Owner Balance: {this.accountOneBalance}</li>
+                <li>Index 1 Balance: {this.accountTwoBalance}</li>
+                <li>Index 2 Balance: {this.accountThreeBalance}</li>
+              </ul>
             </div>
-            <form onSubmit={this.handleSubmit}>
+            {/* <form onSubmit={this.handleSubmit}>
               <input type="number" onChange={this.handleChange} value={this.state.input}></input>
               <input type="submit"></input>
-            </form>
+            </form> */}
           </div>
         </main>
       </div>
