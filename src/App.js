@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
-import MetaCoinContract from '../build/contracts/MetaCoin.json'
+import IdeoCoinContract from '../build/contracts/IdeoCoin.json'
 import getWeb3 from './utils/getWeb3'
 
 import './css/oswald.css'
@@ -32,28 +32,48 @@ class App extends Component {
       // Instantiate contract once web3 provided.
       // this.instantiateContract()
       this.getContracts()
-      // this.sendMetaCoin()
-      this.getMetaCoinBalance()
+      this.sendIdeoCoin()
+      // this.mintCoinsToAccount()
+      this.getIdeoCoinBalance()
     })
     .catch(() => {
       console.log('Error finding web3.')
     })
   }
 
-
-
-  sendMetaCoin() {
+  mintCoinsToAccount() {
     const contract = require('truffle-contract')
-    const MetaCoin = contract(MetaCoinContract)
-    MetaCoin.setProvider(this.state.web3.currentProvider)
+    const IdeoCoin = contract(IdeoCoinContract)
+    IdeoCoin.setProvider(this.state.web3.currentProvider)
 
-    var account_one = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"; // an address
-    var account_two = '0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef'; // another address
+    var account = 2; // an address
 
     var meta;
-      MetaCoin.deployed().then(function(instance) {
+      IdeoCoin.deployed().then(function(instance) {
         meta = instance;
-        return meta.sendCoin(account_two, 10, {from: account_one});
+        return meta.mintToken(account, 1000000);
+      }).then(function(result) {
+        // If this callback is called, the transaction was successfully processed.
+        alert("Transaction successful!")
+      }).catch(function(e) {
+        console.log(e);
+        // There was an error! Handle it.
+      })
+  }
+
+
+  sendIdeoCoin() {
+    const contract = require('truffle-contract')
+    const IdeoCoin = contract(IdeoCoinContract)
+    IdeoCoin.setProvider(this.state.web3.currentProvider)
+
+    var account_one = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"; // an address
+    var account_two = '0x2932b7A2355D6fecc4b5c0B6BD44cC31df247a2e'; // another address
+
+    var meta;
+      IdeoCoin.deployed().then(function(instance) {
+        meta = instance;
+        return meta.sendCoin(account_two, 1000000, {from: account_one});
       }).then(function(result) {
         // If this callback is called, the transaction was successfully processed.
         alert("Transaction successful!")
@@ -64,18 +84,19 @@ class App extends Component {
 
   }
 
-  getMetaCoinBalance() {
+  getIdeoCoinBalance() {
     const contract = require('truffle-contract')
-    const MetaCoin = contract(MetaCoinContract)
-    MetaCoin.setProvider(this.state.web3.currentProvider)
-    // MetaCoin.deployed().then(function(instance) {
+    const IdeoCoin = contract(IdeoCoinContract)
+    IdeoCoin.setProvider(this.state.web3.currentProvider)
+    // IdeoCoin.deployed().then(function(instance) {
     //   console.log(instance);
     // });
 
     var account_one = '0x627306090abaB3A6e1400e9345bC60c78a8BEf57'; // an address
     var meta;
 
-    MetaCoin.deployed().then(function(instance) {
+
+    IdeoCoin.deployed().then(function(instance) {
       meta = instance;
       return meta.getBalance.call(account_one, {from: account_one});
     }).then(function(balance) {
@@ -84,6 +105,7 @@ class App extends Component {
       // Let's print the return value.
       console.log(balance.toNumber());
     }).catch(function(e) {
+      console.log(e);
       // There was an error! Handle it.
     })
 
