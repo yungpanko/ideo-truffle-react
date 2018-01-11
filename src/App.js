@@ -32,7 +32,7 @@ class App extends Component {
       // Instantiate contract once web3 provided.
       // this.instantiateContract()
       this.getContracts()
-      this.sendIdeoCoin()
+      // this.sendIdeoCoin()
       // this.mintCoinsToAccount()
       this.getIdeoCoinBalance()
     })
