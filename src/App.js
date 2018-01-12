@@ -5,9 +5,10 @@ import getWeb3 from './utils/getWeb3'
 import Balances from './components/Balances.js'
 import ReactCountdownClock from 'react-countdown-clock'
 
-import './css/oswald.css'
-import './css/open-sans.css'
-import './css/pure-min.css'
+// import './css/oswald.css'
+// import './css/open-sans.css'
+// import './css/pure-min.css'
+import './css/bootstrap.min.css'
 import './App.css'
 
 // Create our number formatter.
@@ -358,89 +359,115 @@ class App extends Component {
   }
 
   render() {
-    let resp
-    // if (this.state.storageValue < 20) {
-    //   resp = "contract valid"
-    // } else {
-    //   resp = "failed contract"
-    // }
     return (
       <div className="App">
-        <nav className="navbar pure-menu pure-menu-horizontal">
-            {/* <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a> */}
-        </nav>
+        <div className="container">
+          <nav className="header" id="banner">
+              <div className="container-fluid">
+                <div className="padleft10px">
+                  { this.state.contract ?
+                    <button className="pull-left backButton" onClick={this.handleStartOver}>
+                      Start Over
+                    </button>  :
+                    <div></div>
+                  }
+                  {/* <button type="button" className="pull-left backButton">
+                    <span className="glyphicon glyphicon-chevron-left" ></span>Back
+                  </button> */}
+                  <div>
+                    <h3>Sweet Ride</h3>
+                  </div>
+                </div>
+              </div>
+            </nav>
 
-        <main className="container">
-          <div className="pure-g">
-            <div className="pure-u-1-1">
-              {/* <h1>Good to Go!</h1>
-              <p>Your Truffle Box is installed and ready.</p>
-              <h2>Smart Contract Example</h2>
-              <p>If your contracts compiled and migrated successfully, below will show a stored value of 5 (by default).</p>
-              <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
-              <p>The stored value is: {this.state.storageValue}</p> */}
-              <h1>{resp}</h1>
-              { this.state.contract ?
-                <div><button onClick={this.handleStartOver}>
-                  Start Over
-                </button>
-                <br/>
-                <br/>
-                {/* <button onClick={this.handleCrash}>
-                  Crash Button
-                </button> */}
-              </div> :
-                <div></div>
-              }
 
-              <ul>
-                <Balances balance1={this.state.accountOneBalance} balance2={this.state.accountTwoBalance}/>
-              </ul>
-              { this.state.results ? <div><h1>Final Tally: {this.state.results}</h1></div> : <div></div> }
+            <div >
+
+              <div >
+
+
+              { this.state.results ? <div className="col-md-12 text-center"><h1>Final Tally: {this.state.results}</h1></div> : <div></div> }
               { this.state.contract ?
-              <ReactCountdownClock seconds={60}
+                <div className="row">
+                  <div className="col-md-12 text-center">
+
+              <ReactCountdownClock seconds={5}
                      color="#34ed99"
                      alpha={0.9}
-                     size={600}
-                     onComplete={this.handleCountdownComplete}/> :
+                     size={400}
+                     onComplete={this.handleCountdownComplete}/>
+                   </div>
+                   </div> :
                      <div>
-                       <form onSubmit={this.handleTransactionSubmit}>
-                         <label>Renter</label>
-                         <select value={this.state.fromValue} onChange={this.handleFromValueChange}>
+                     <div className="row">
+                         <div className="col-md-12 text-center">
+                          <img src="img/car.png" alt="car"/>
+                         </div>
+                     </div>
+
+                     <br/><br/>
+                      <div className="row paddpanel">
+                       <div className="col-md-12 col-sm-12 col-xs-12">
+                           <h3>Welcome to Sweet Ride Smart Contract Page</h3>
+                         </div>
+                       </div>
+
+                       <br/><br/>
+                     <form onSubmit={this.handleTransactionSubmit}>
+                     <div className="row paddpanel">
+                       <div className="col-md-5 col-sm-5 col-xs-5">
+                        <label className="labelStyle">Renter &nbsp;</label><br/>
+                         <select className="form-control" id="renter" value={this.state.fromValue} onChange={this.handleFromValueChange}>
                            <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Amy</option>
                            <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Theo</option>
                          </select>
-                         <br/>
-                         <label>Car Owner</label>
-                         <select value={this.state.toValue} onChange={this.handleToValueChange}>
+                       </div>
+                         <div className="col-md-5 col-sm-5 col-xs-5 text-left">
+                         <label className="labelStyle">Car Owner</label>
+                         <select className="form-control" id="owner" value={this.state.toValue} onChange={this.handleToValueChange}>
                            <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Theo</option>
                            <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Amy</option>
                          </select>
-                         <br/>
-                         <label>Rental Price</label>
-                         <input type='number' onChange={this.handleAmountChange} value={this.state.amount}>
-                         </input>
-                         <br/>
-                         <label>Penalty Price</label>
-                         <input type='number' onChange={this.handlePenaltyAmountChange} value={this.state.penaltyAmount}>
-                         </input>
-                         <br/>
-                         {/* <input type="submit"></input> */}
+                       </div>
+                     </div>
+                       <div className="row paddpanel">
+                         <div className="col-md-5 col-sm-5 col-xs-5">
+                               <div className="form-group">
+                                 <label className="labelStyle">Rental Price</label>
+                                 <input className="form-control" id="exampleInputEmail2" type='number' onChange={this.handleAmountChange} value={this.state.amount}>
+                                </input>
+                              </div>
+                            </div>
+                          <div className="col-md-5 col-sm-5 col-xs-5 text-left">
+                                <div className="form-group">
+                                  <label className="labelStyle">Penalty Price</label>
+                                  <input className="form-control" id="exampleInputPassword2" type='number' onChange={this.handlePenaltyAmountChange} value={this.state.penaltyAmount}>
+                                  </input>
+                                </div>
+                              </div>
+                       </div>
                        </form>
-                       <br/>
-                       <button onClick={this.handleNewContract}>
+                       <div className="row paddpanel">
+                         <div className="col-md-12 col-sm-12 col-xs-12">
+                       <button className="btn btn-block  buttonContinue" onClick={this.handleNewContract}>
                          New Contract
                        </button>
+                       </div>
+                       </div>
+                       </div>
+                     }
+                     <div className="row paddpanel">
+                         <div className="col-md-12 col-sm-12 col-xs-12">
+                             <ul>
+                               <Balances balance1={this.state.accountOneBalance} balance2={this.state.accountTwoBalance}/>
+                             </ul>
+                         </div>
                      </div>
-                   }
+                </div>
             </div>
-            {/* <form onSubmit={this.handleSubmit}>
-              <input type="number" onChange={this.handleChange} value={this.state.input}></input>
-              <input type="submit"></input>
-            </form> */}
           </div>
-        </main>
-      </div>
+        </div>
     );
   }
 }
