@@ -3,11 +3,21 @@ import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
 import IdeoCoinContract from '../build/contracts/IdeoCoin.json'
 import getWeb3 from './utils/getWeb3'
 import Balances from './components/Balances.js'
+import ReactCountdownClock from 'react-countdown-clock'
 
 import './css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
+
+// Create our number formatter.
+const formatter = new Intl.NumberFormat('en-US', {
+style: 'currency',
+currency: 'USD',
+minimumFractionDigits: 0,
+// the default value for minimumFractionDigits depends on the currency
+// and is usually already 2
+})
 
 class App extends Component {
   constructor(props) {
@@ -20,8 +30,12 @@ class App extends Component {
       fromValue: '0x627306090abaB3A6e1400e9345bC60c78a8BEf57',
       toValue: '0xf17f52151EbEF6C7334FAD080c5704D77216b732',
       amount: '',
+      penaltyAmount: '',
       accountOneBalance: 0,
-      accountTwoBalance: 0
+      accountTwoBalance: 0,
+      contract: '',
+      results: '',
+      penatly: ''
     }
   }
 
@@ -61,6 +75,10 @@ class App extends Component {
     .catch(() => {
       console.log('Error finding web3.')
     })
+    // setInterval(() => {
+    //   // this.checkAccelerometerX()
+    //   this.checkAccelerometerY()
+    // }, 1500);
   }
 
   mintCoinsToAccount() {
@@ -118,6 +136,8 @@ class App extends Component {
     }).then(result => {
       // If this callback is called, the transaction was successfully processed.
       console.log("Transaction successful!")
+      this.getCoinOwnerBalance()
+      this.getIndexOneBalance()
     }).catch(err => {
       console.log(err);
       // There was an error! Handle it.
@@ -253,6 +273,20 @@ class App extends Component {
     this.getIndexOneBalance()
   }
 
+  handleCountdownComplete = (event) => {
+    if (this.state.penatly) {
+      this.executeFormTransaction(this.state.fromValue, this.state.toValue, this.state.amount + this.state.penaltyAmount)
+      this.setState({
+        results: formatter.format(this.state.amount + this.state.penaltyAmount)
+      })
+    } else {
+      this.executeFormTransaction(this.state.fromValue, this.state.toValue, this.state.amount)
+      this.setState({
+        results: formatter.format(this.state.amount)
+      })
+    }
+  }
+
   handleToValueChange = (event) => {
     this.setState({
       toValue: event.target.value
@@ -261,13 +295,66 @@ class App extends Component {
 
   handleAmountChange = (event) => {
     this.setState({
-      amount: event.target.value
+      amount: parseInt(event.target.value,10)
+    })
+  }
+
+  handlePenaltyAmountChange = (event) => {
+    this.setState({
+      penaltyAmount: parseInt(event.target.value,10)
     })
   }
 
   handleSubmit = (event) => {
     event.preventDefault()
     this.instantiateContract(this.state.input)
+  }
+
+  handleNewContract = (event) => {
+    this.setState({
+      contract: "yes"
+    })
+    setInterval(() => {
+      // this.checkAccelerometerX()
+      this.checkAccelerometerY()
+    }, 1000);
+  }
+
+  handleStartOver = (event) => {
+    this.setState({
+      contract: '',
+      results: '',
+      penaltyAmount: '',
+      amount: '',
+      penatly:''
+    })
+  }
+
+  handleCrash = (event) => {
+    this.setState({
+      penatly: 'yes'
+    })
+  }
+
+  checkAccelerometerX() {
+    fetch('https://io.adafruit.com/api/v2/gpangaro/feeds/xvalue/data/last')
+    .then(res => res.json())
+    .then(res => console.log("x: " + res.value))
+    .catch(error => console.error('Error:', error))
+  }
+
+  checkAccelerometerY() {
+    fetch('https://io.adafruit.com/api/v2/gpangaro/feeds/yvalue/data/last')
+    .then(res => res.json())
+    .then(res => {
+      console.log("y: " + res.value)
+      if (res.value > 0) {
+        this.setState({
+          penatly: "yes"
+        })
+      }}
+    )
+    .catch(error => console.error('Error:', error))
   }
 
   render() {
@@ -293,31 +380,59 @@ class App extends Component {
               <p>Try changing the value stored on <strong>line 59</strong> of App.js.</p>
               <p>The stored value is: {this.state.storageValue}</p> */}
               <h1>{resp}</h1>
-              <button onClick={(event) => {this.getCoinOwnerBalance();this.getIndexOneBalance();}}>
-                Get Balances
-              </button>
-              <form onSubmit={this.handleTransactionSubmit}>
-                <label>From</label>
-                <select value={this.state.fromValue} onChange={this.handleFromValueChange}>
-                  <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Coin Owner</option>
-                  <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Index 1</option>
-                </select>
+              { this.state.contract ?
+                <div><button onClick={this.handleStartOver}>
+                  Start Over
+                </button>
                 <br/>
-                <label>To</label>
-                <select value={this.state.toValue} onChange={this.handleToValueChange}>
-                  <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Index 1</option>
-                  <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Coin Owner</option>
-                </select>
                 <br/>
-                <label>Amount</label>
-                <input type='number' onChange={this.handleAmountChange} value={this.state.amount}>
-                </input>
-                <br/>
-                <input type="submit"></input>
-              </form>
+                {/* <button onClick={this.handleCrash}>
+                  Crash Button
+                </button> */}
+              </div> :
+                <div></div>
+              }
+
               <ul>
                 <Balances balance1={this.state.accountOneBalance} balance2={this.state.accountTwoBalance}/>
               </ul>
+              { this.state.results ? <div><h1>Final Tally: {this.state.results}</h1></div> : <div></div> }
+              { this.state.contract ?
+              <ReactCountdownClock seconds={60}
+                     color="#34ed99"
+                     alpha={0.9}
+                     size={600}
+                     onComplete={this.handleCountdownComplete}/> :
+                     <div>
+                       <form onSubmit={this.handleTransactionSubmit}>
+                         <label>Renter</label>
+                         <select value={this.state.fromValue} onChange={this.handleFromValueChange}>
+                           <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Amy</option>
+                           <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Theo</option>
+                         </select>
+                         <br/>
+                         <label>Car Owner</label>
+                         <select value={this.state.toValue} onChange={this.handleToValueChange}>
+                           <option value="0xf17f52151EbEF6C7334FAD080c5704D77216b732">Theo</option>
+                           <option value="0x627306090abaB3A6e1400e9345bC60c78a8BEf57">Amy</option>
+                         </select>
+                         <br/>
+                         <label>Rental Price</label>
+                         <input type='number' onChange={this.handleAmountChange} value={this.state.amount}>
+                         </input>
+                         <br/>
+                         <label>Penalty Price</label>
+                         <input type='number' onChange={this.handlePenaltyAmountChange} value={this.state.penaltyAmount}>
+                         </input>
+                         <br/>
+                         {/* <input type="submit"></input> */}
+                       </form>
+                       <br/>
+                       <button onClick={this.handleNewContract}>
+                         New Contract
+                       </button>
+                     </div>
+                   }
             </div>
             {/* <form onSubmit={this.handleSubmit}>
               <input type="number" onChange={this.handleChange} value={this.state.input}></input>

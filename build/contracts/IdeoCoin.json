@@ -3530,11 +3530,11 @@
     "5777": {
       "events": {},
       "links": {
-        "ConvertLib": "0x2c2b9c9a4a25e24b174f26114e8926a9f2128fe4"
+        "ConvertLib": "0xf25186b5081ff5ce73482ad761db0eb0d25abfbf"
       },
-      "address": "0xfb88de099e13c3ed21f80a7a1e49f8caecf10df6"
+      "address": "0x9fbda871d559710256a2502a2517b794b482db40"
     }
   },
   "schemaVersion": "1.0.1",
-  "updatedAt": "2018-01-11T22:53:19.427Z"
+  "updatedAt": "2018-01-12T14:57:27.053Z"
 }
